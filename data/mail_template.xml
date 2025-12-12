@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="mail_template_sale_order_confirmed" model="mail.template">
+            <field name="name">Sales Order Confirmed - Auto Email</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="subject">Confirmation de commande ${object.name}</field>
+            <field name="email_from">${(object.company_id.email or user.email_formatted or '')|safe}</field>
+            <field name="email_to">${object.partner_id.email or ''}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+                <![CDATA[
+                <div style="font-family: Arial, sans-serif;">
+                    <p>Bonjour ${object.partner_id.name or ''},</p>
+                    <p>Votre commande <strong>${object.name}</strong> a été validée.</p>
+                    <p>Montant total : <strong>${format_amount(object.amount_total, object.currency_id)}</strong></p>
+                    <p>Merci pour votre confiance.</p>
+                    <p>${object.company_id.name}</p>
+                </div>
+                ]]>
+            </field>
+        </record>
+
+        <record id="mail_template_picking_done" model="mail.template">
+            <field name="name">Delivery Confirmed - Auto Email</field>
+            <field name="model_id" ref="stock.model_stock_picking"/>
+            <field name="subject">Confirmation d’expédition ${object.name}</field>
+            <field name="email_from">${(object.company_id.email or user.email_formatted or '')|safe}</field>
+            <field name="email_to">${object.partner_id.email or ''}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+                <![CDATA[
+                <div style="font-family: Arial, sans-serif;">
+                    <p>Bonjour ${object.partner_id.name or ''},</p>
+                    <p>Votre commande a été expédiée.</p>
+                    <p>Référence expédition : <strong>${object.name}</strong></p>
+                    <p>Merci.</p>
+                    <p>${object.company_id.name}</p>
+                </div>
+                ]]>
+            </field>
+        </record>
+
+    </data>
+</odoo>
