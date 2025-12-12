@@ -24,7 +24,7 @@
         <record id="mail_template_picking_done" model="mail.template">
             <field name="name">Delivery Confirmed - Auto Email</field>
             <field name="model_id" ref="stock.model_stock_picking"/>
-            <field name="subject">Confirmation d’expédition {{ object.name }}</field>
+            <field name="subject">Confirmation expédition {{ object.name }}</field>
             <field name="email_from">{{ (object.company_id.email or user.email_formatted or '')|safe }}</field>
             <field name="email_to">{{ object.partner_id.email or '' }}</field>
             <field name="auto_delete" eval="True"/>
