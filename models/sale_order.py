@@ -18,9 +18,12 @@ class SaleOrder(models.Model):
             for order in self:
                 if order.partner_id and order.partner_id.email:
                     attachment_id = False
-                    report = self.env.ref("sale.action_report_saleorder", raise_if_not_found=False)
-                    if report:
-                        pdf_content, _content_type = report._render_qweb_pdf([order.id])
+                    report_ref = "sale.action_report_saleorder"
+                    if self.env.ref(report_ref, raise_if_not_found=False):
+                        pdf_content, _content_type = self.env["ir.actions.report"]._render_qweb_pdf(
+                            report_ref,
+                            res_ids=[order.id],
+                        )
                         attachment = self.env["ir.attachment"].create(
                             {
                                 "name": f"{order.name}.pdf",
