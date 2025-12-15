@@ -7,8 +7,6 @@
             <field name="subject">Confirmation de commande ${object.name}</field>
             <field name="email_from">${object.company_id.email or user.email_formatted or ''}</field>
             <field name="email_to">${object.partner_id.email or ''}</field>
-            <field name="report_template" ref="sale.action_report_saleorder"/>
-            <field name="report_name">Commande_${object.name}</field>
             <field name="auto_delete" eval="True"/>
             <field name="body_html" type="html">
 <div style="font-family: Arial, sans-serif;">
