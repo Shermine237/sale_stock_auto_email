@@ -5,7 +5,7 @@
             <field name="name">Sales Order Confirmed - Auto Email</field>
             <field name="model_id" ref="sale.model_sale_order"/>
             <field name="subject">Confirmation de commande {{ object.name }}</field>
-            <field name="email_from">{{ (object.company_id.email or user.email_formatted or '')|safe }}</field>
+            <field name="email_from">{{ object.company_id.email or user.email_formatted or '' }}</field>
             <field name="email_to">{{ object.partner_id.email or '' }}</field>
             <field name="auto_delete" eval="True"/>
             <field name="body_html" type="html">
@@ -23,7 +23,7 @@
             <field name="name">Delivery Confirmed - Auto Email</field>
             <field name="model_id" ref="stock.model_stock_picking"/>
             <field name="subject">Confirmation expédition {{ object.name }}</field>
-            <field name="email_from">{{ (object.company_id.email or user.email_formatted or '')|safe }}</field>
+            <field name="email_from">{{ object.company_id.email or user.email_formatted or '' }}</field>
             <field name="email_to">{{ object.partner_id.email or '' }}</field>
             <field name="auto_delete" eval="True"/>
             <field name="body_html" type="html">
