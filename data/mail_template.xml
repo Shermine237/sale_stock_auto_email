@@ -9,15 +9,13 @@
             <field name="email_to">{{ object.partner_id.email or '' }}</field>
             <field name="auto_delete" eval="True"/>
             <field name="body_html" type="html">
-                <![CDATA[
-                <div style="font-family: Arial, sans-serif;">
-                    <p>Bonjour {{ object.partner_id.name or '' }},</p>
-                    <p>Votre commande <strong>{{ object.name }}</strong> a été validée.</p>
-                    <p>Montant total : <strong>{{ format_amount(object.amount_total, object.currency_id) }}</strong></p>
-                    <p>Merci pour votre confiance.</p>
-                    <p>{{ object.company_id.name }}</p>
-                </div>
-                ]]>
+<div style="font-family: Arial, sans-serif;">
+    <p>Bonjour {{ object.partner_id.name or '' }},</p>
+    <p>Votre commande <strong>{{ object.name }}</strong> a été validée.</p>
+    <p>Montant total : <strong>{{ format_amount(object.amount_total, object.currency_id) }}</strong></p>
+    <p>Merci pour votre confiance.</p>
+    <p>{{ object.company_id.name }}</p>
+</div>
             </field>
         </record>
 
@@ -29,15 +27,13 @@
             <field name="email_to">{{ object.partner_id.email or '' }}</field>
             <field name="auto_delete" eval="True"/>
             <field name="body_html" type="html">
-                <![CDATA[
-                <div style="font-family: Arial, sans-serif;">
-                    <p>Bonjour {{ object.partner_id.name or '' }},</p>
-                    <p>Votre commande a été expédiée.</p>
-                    <p>Référence expédition : <strong>{{ object.name }}</strong></p>
-                    <p>Merci.</p>
-                    <p>{{ object.company_id.name }}</p>
-                </div>
-                ]]>
+<div style="font-family: Arial, sans-serif;">
+    <p>Bonjour {{ object.partner_id.name or '' }},</p>
+    <p>Votre commande a été expédiée.</p>
+    <p>Référence expédition : <strong>{{ object.name }}</strong></p>
+    <p>Merci.</p>
+    <p>{{ object.company_id.name }}</p>
+</div>
             </field>
         </record>
     </data>
