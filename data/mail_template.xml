@@ -4,17 +4,17 @@
         <record id="mail_template_sale_order_confirmed" model="mail.template">
             <field name="name">Sales Order Confirmed - Auto Email</field>
             <field name="model_id" ref="sale.model_sale_order"/>
-            <field name="subject">Confirmation de commande ${object.name}</field>
-            <field name="email_from">${object.company_id.email or user.email_formatted or ''}</field>
-            <field name="email_to">${object.partner_id.email or ''}</field>
+            <field name="subject">Confirmation de commande {{ object.name }}</field>
+            <field name="email_from">"{{ object.company_id.name }}" &lt;{{ (object.company_id.email or user.email) }}&gt;</field>
+            <field name="email_to">{{ object.partner_id.email or '' }}</field>
             <field name="auto_delete" eval="True"/>
             <field name="body_html" type="html">
 <div style="font-family: Arial, sans-serif;">
-    <p>Bonjour ${object.partner_id.name or ''},</p>
-    <p>Votre commande <strong>${object.name}</strong> a été validée.</p>
-    <p>Montant total : <strong>${format_amount(object.amount_total, object.currency_id)}</strong></p>
+    <p>Bonjour <t t-out="object.partner_id.name or ''"/>,</p>
+    <p>Votre commande <strong><t t-out="object.name"/></strong> a été validée.</p>
+    <p>Montant total : <strong><t t-out="format_amount(object.amount_total, object.currency_id)"/></strong></p>
     <p>Merci pour votre confiance.</p>
-    <p>${object.company_id.name}</p>
+    <p><t t-out="object.company_id.name"/></p>
 </div>
             </field>
         </record>
@@ -22,17 +22,17 @@
         <record id="mail_template_picking_done" model="mail.template">
             <field name="name">Delivery Confirmed - Auto Email</field>
             <field name="model_id" ref="stock.model_stock_picking"/>
-            <field name="subject">Confirmation expédition ${object.name}</field>
-            <field name="email_from">${object.company_id.email or user.email_formatted or ''}</field>
-            <field name="email_to">${object.partner_id.email or ''}</field>
+            <field name="subject">Confirmation expédition {{ object.name }}</field>
+            <field name="email_from">"{{ object.company_id.name }}" &lt;{{ (object.company_id.email or user.email) }}&gt;</field>
+            <field name="email_to">{{ object.partner_id.email or '' }}</field>
             <field name="auto_delete" eval="True"/>
             <field name="body_html" type="html">
 <div style="font-family: Arial, sans-serif;">
-    <p>Bonjour ${object.partner_id.name or ''},</p>
+    <p>Bonjour <t t-out="object.partner_id.name or ''"/>,</p>
     <p>Votre commande a été expédiée.</p>
-    <p>Référence expédition : <strong>${object.name}</strong></p>
+    <p>Référence expédition : <strong><t t-out="object.name"/></strong></p>
     <p>Merci.</p>
-    <p>${object.company_id.name}</p>
+    <p><t t-out="object.company_id.name"/></p>
 </div>
             </field>
         </record>
