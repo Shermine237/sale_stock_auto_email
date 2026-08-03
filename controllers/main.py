@@ -1,0 +1,94 @@
+# -*- coding: utf-8 -*-
+
+import json
+import logging
+
+from odoo.http import request, route
+from odoo.addons.website_sale.controllers.main import WebsiteSale
+from odoo.tools import str2bool
+
+_logger = logging.getLogger(__name__)
+
+
+class WebsiteSaleAutoEmail(WebsiteSale):
+    """Send confirmation email when the delivery address is confirmed on the website.
+
+    Native checkout / order status is unchanged — only an email is sent.
+    """
+
+    @route(['/shop/confirm_order'], type='http', auth="public", website=True, sitemap=False)
+    def shop_confirm_order(self, **post):
+        """Checkout "Confirm" after delivery address — send email if available."""
+        order_sudo = request.website.sale_get_order()
+        # Same gate as native: only proceed when cart + addresses are valid.
+        can_send = bool(order_sudo) and not self._check_cart_and_addresses(order_sudo)
+
+        res = super().shop_confirm_order(**post)
+
+        if can_send and order_sudo.exists():
+            try:
+                order_sudo._send_auto_confirmation_email()
+            except Exception:
+                _logger.exception(
+                    "Failed to send auto confirmation email for order %s",
+                    order_sudo.id,
+                )
+        return res
+
+    @route(
+        '/shop/address/submit',
+        type='http',
+        methods=['POST'],
+        auth='public',
+        website=True,
+        sitemap=False,
+    )
+    def shop_address_submit(
+        self,
+        partner_id=None,
+        address_type='billing',
+        use_delivery_as_billing=None,
+        callback=None,
+        required_fields=None,
+        **form_data,
+    ):
+        """After a successful delivery address submit, send email if present."""
+        use_delivery_as_billing_bool = str2bool(use_delivery_as_billing or 'false')
+        is_delivery_step = (
+            address_type == 'delivery'
+            or use_delivery_as_billing_bool
+        )
+
+        result = super().shop_address_submit(
+            partner_id=partner_id,
+            address_type=address_type,
+            use_delivery_as_billing=use_delivery_as_billing,
+            callback=callback,
+            required_fields=required_fields,
+            **form_data,
+        )
+
+        if not is_delivery_step:
+            return result
+
+        order_sudo = request.website.sale_get_order()
+        if not order_sudo:
+            return result
+
+        try:
+            payload = json.loads(result)
+        except (TypeError, ValueError, json.JSONDecodeError):
+            return result
+
+        # Native success response contains redirectUrl; errors do not.
+        if not payload.get('redirectUrl'):
+            return result
+
+        try:
+            order_sudo._send_auto_confirmation_email()
+        except Exception:
+            _logger.exception(
+                "Failed to send auto confirmation email for order %s",
+                order_sudo.id,
+            )
+        return result
