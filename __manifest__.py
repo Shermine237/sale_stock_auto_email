@@ -2,7 +2,7 @@
 
 {
     "name": "Sale & Delivery Auto Emails",
-    "version": "18.0.1.5.0",
+    "version": "18.0.1.6.0",
     "category": "Sales",
     "summary": "Auto emails on website delivery address confirm and delivery validation",
     "depends": [
@@ -14,6 +14,7 @@
     ],
     "data": [
         "data/mail_template.xml",
+        "views/res_config_settings_views.xml",
     ],
     "installable": True,
     "application": False,

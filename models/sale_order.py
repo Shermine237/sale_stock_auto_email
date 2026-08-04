@@ -61,5 +61,13 @@ class SaleOrder(models.Model):
             partner = order._get_auto_email_partner()
             if not partner.email:
                 continue
-            order._send_order_notification_mail(template)
+            mail_values = {}
+            if order.website_id and order.website_id.auto_confirmation_email_from:
+                mail_values["email_from"] = order.website_id.auto_confirmation_email_from
+            order.with_context(force_send=True).message_post_with_source(
+                template,
+                email_layout_xmlid="mail.mail_notification_layout_with_responsible_signature",
+                subtype_xmlid="mail.mt_comment",
+                **mail_values,
+            )
             order.auto_confirmation_mail_sent = True
