@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields, models
+import logging
+
+from odoo import SUPERUSER_ID, fields, models
+
+_logger = logging.getLogger(__name__)
 
 
 class SaleOrder(models.Model):
@@ -47,27 +51,46 @@ class SaleOrder(models.Model):
         """Send confirmation email once, only if a customer email is available.
 
         Does not change the order state.
+
+        Important: website checkout often runs as public user with sudo. Native
+        Odoo switches to SUPERUSER before sending; we must do the same,
+        otherwise the mail is silently skipped on production/test.
         """
         template = self.env.ref(
             "sale_stock_auto_email.mail_template_sale_order_confirmed",
             raise_if_not_found=False,
         )
         if not template:
+            _logger.warning(
+                "sale_stock_auto_email: template mail_template_sale_order_confirmed not found"
+            )
             return
 
         for order in self:
             if order.auto_confirmation_mail_sent:
+                _logger.info(
+                    "sale_stock_auto_email: skip order %s (already sent)",
+                    order.name,
+                )
                 continue
+
             partner = order._get_auto_email_partner()
             if not partner.email:
+                _logger.info(
+                    "sale_stock_auto_email: skip order %s (no partner email)",
+                    order.name,
+                )
                 continue
-            mail_values = {}
-            if order.website_id and order.website_id.auto_confirmation_email_from:
-                mail_values["email_from"] = order.website_id.auto_confirmation_email_from
-            order.with_context(force_send=True).message_post_with_source(
-                template,
-                email_layout_xmlid="mail.mail_notification_layout_with_responsible_signature",
-                subtype_xmlid="mail.mt_comment",
-                **mail_values,
+
+            # Same pattern as sale.order._send_order_notification_mail
+            send_order = order
+            if order.env.su:
+                send_order = order.with_user(SUPERUSER_ID)
+
+            send_order._send_order_notification_mail(template)
+            order.sudo().auto_confirmation_mail_sent = True
+            _logger.info(
+                "sale_stock_auto_email: confirmation email sent for order %s to %s",
+                order.name,
+                partner.email,
             )
-            order.auto_confirmation_mail_sent = True

@@ -19,20 +19,35 @@ class WebsiteSaleAutoEmail(WebsiteSale):
     @route(['/shop/confirm_order'], type='http', auth="public", website=True, sitemap=False)
     def shop_confirm_order(self, **post):
         """Checkout "Confirm" after delivery address — send email if available."""
+        # Keep a reference before super(): some flows may alter the session cart.
         order_sudo = request.website.sale_get_order()
-        # Same gate as native: only proceed when cart + addresses are valid.
-        can_send = bool(order_sudo) and not self._check_cart_and_addresses(order_sudo)
 
         res = super().shop_confirm_order(**post)
 
-        if can_send and order_sudo.exists():
+        if not order_sudo:
+            order_sudo = request.website.sale_get_order()
+        if not order_sudo:
+            last_order_id = request.session.get('sale_last_order_id')
+            if last_order_id:
+                order_sudo = request.env['sale.order'].sudo().browse(last_order_id).exists()
+
+        if order_sudo:
             try:
+                _logger.info(
+                    "sale_stock_auto_email: shop_confirm_order trigger for order %s (%s)",
+                    order_sudo.id,
+                    order_sudo.name,
+                )
                 order_sudo._send_auto_confirmation_email()
             except Exception:
                 _logger.exception(
                     "Failed to send auto confirmation email for order %s",
                     order_sudo.id,
                 )
+        else:
+            _logger.warning(
+                "sale_stock_auto_email: shop_confirm_order with no order found"
+            )
         return res
 
     @route(
@@ -85,6 +100,11 @@ class WebsiteSaleAutoEmail(WebsiteSale):
             return result
 
         try:
+            _logger.info(
+                "sale_stock_auto_email: address/submit trigger for order %s (%s)",
+                order_sudo.id,
+                order_sudo.name,
+            )
             order_sudo._send_auto_confirmation_email()
         except Exception:
             _logger.exception(
